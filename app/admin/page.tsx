@@ -319,113 +319,133 @@ export default function AdminPage() {
         </div>
 
         <div className="mt-4 space-y-4">
-          {cities.map((city) => {
-            const isOpen = !!open[city.id]
-            const totals = totalsFor(city.id)
-            const data = byCity[city.id] ?? { attractions: [], restaurants: [], hotels: [] }
+           {cities.map((city) => {
+  const isOpen = !!open[city.id]
+  const totals = totalsFor(city.id)
+  const data = byCity[city.id] ?? { attractions: [], restaurants: [], hotels: [] }
 
-            return (
-              <div key={city.id} className="rounded-xl border border-white/15 bg-white/5">
-                <button
-                  className="w-full text-left px-4 py-3 flex items-center justify-between"
-                  onClick={async () => {
-                    setOpen(prev => ({ ...prev, [city.id]: !prev[city.id] }))
-                    if (!byCity[city.id]) await refreshCity(city.id)
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    {isOpen ? <FolderOpen className="size-5 text-white/70" /> : <Folder className="size-5 text-white/70" />}
-                    <div>
-                      <div className="font-medium">{city.name}</div>
-                      <div className="text-xs text-gray-400">
-                        {totals.pts} pts • {totals.rests} rests • {totals.hots} hotéis
-                      </div>
-                    </div>
-                  </div>
-                  <span className="text-xl">{isOpen ? '▾' : '▸'}</span>
-                </button>
+  return (
+    <div key={city.id} className="rounded-xl border border-white/15 bg-white/5">
+      <div className="flex items-center justify-between px-4 py-3">
+        <button
+          className="flex-1 text-left flex items-center gap-3"
+          onClick={async () => {
+            setOpen(prev => ({ ...prev, [city.id]: !prev[city.id] }))
+            if (!byCity[city.id]) await refreshCity(city.id)
+          }}
+        >
+          {isOpen ? <FolderOpen className="size-5 text-white/70" /> : <Folder className="size-5 text-white/70" />}
+          <div>
+            <div className="font-medium">{city.name}</div>
+            <div className="text-xs text-gray-400">
+              {totals.pts} pts • {totals.rests} rests • {totals.hots} hotéis
+            </div>
+          </div>
+        </button>
 
-                {isOpen && (
-                  <div className="px-4 pb-4 grid md:grid-cols-3 gap-4">
-                    {/* Pontos */}
-                    <div className="rounded-lg border border-white/10 p-3">
-                      <div className="font-semibold mb-2">Pontos turísticos</div>
-                      {data.attractions.length ? (
-                        <ul className="space-y-2">
-                          {data.attractions.map((it) => (
-                            <li key={it.id} className="flex items-center justify-between rounded-md bg-white/5 px-3 py-2">
-                              <span className="inline-flex items-center gap-2"><Folder className="size-4 text-white/60" /> {it.name}</span>
-                              <button
-                                className="text-red-500 text-sm"
-                                onClick={async () => {
-                                  if (!confirm(`Excluir ponto "${it.name}"?`)) return
-                                  await fetch(`/api/attractions?id=${it.id}`, { method: 'DELETE', headers: { 'x-admin-token': token } })
-                                  await refreshCity(city.id)
-                                  await revalidateCityById(city.id)
-                                }}
-                              >
-                                Excluir
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : <p className="text-gray-400">Nenhum ponto cadastrado.</p>}
-                    </div>
+        {/* Botão excluir cidade */}
+        <button
+          className="ml-4 text-red-400 text-sm hover:text-red-500"
+          onClick={async () => {
+            if (!confirm(`Tem certeza que deseja excluir a cidade "${city.name}" e todos os seus dados?`)) return
+            await fetch(`/api/cities?id=${city.id}`, { method: 'DELETE', headers: { 'x-admin-token': token } })
+            alert(`Cidade "${city.name}" excluída com sucesso!`)
+            // atualiza lista
+            const fresh = await fetch('/api/cities', { cache: 'no-store' }).then(r => r.json())
+            if (Array.isArray(fresh)) setCities(fresh)
+            await fetch('/api/revalidate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+              body: JSON.stringify({ paths: ['/'] }),
+            })
+          }}
+        >
+          Excluir
+        </button>
+      </div>
 
-                    {/* Restaurantes */}
-                    <div className="rounded-lg border border-white/10 p-3">
-                      <div className="font-semibold mb-2">Restaurantes</div>
-                      {data.restaurants.length ? (
-                        <ul className="space-y-2">
-                          {data.restaurants.map((it) => (
-                            <li key={it.id} className="flex items-center justify-between rounded-md bg-white/5 px-3 py-2">
-                              <span className="inline-flex items-center gap-2"><Folder className="size-4 text-white/60" /> {it.name}</span>
-                              <button
-                                className="text-red-500 text-sm"
-                                onClick={async () => {
-                                  if (!confirm(`Excluir restaurante "${it.name}"?`)) return
-                                  await fetch(`/api/restaurants?id=${it.id}`, { method: 'DELETE', headers: { 'x-admin-token': token } })
-                                  await refreshCity(city.id)
-                                  await revalidateCityById(city.id)
-                                }}
-                              >
-                                Excluir
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : <p className="text-gray-400">Nenhum restaurante cadastrado.</p>}
-                    </div>
+      {isOpen && (
+        <div className="px-4 pb-4 grid md:grid-cols-3 gap-4">
+          {/* Pontos */}
+          <div className="rounded-lg border border-white/10 p-3">
+            <div className="font-semibold mb-2">Pontos turísticos</div>
+            {data.attractions.length ? (
+              <ul className="space-y-2">
+                {data.attractions.map((it) => (
+                  <li key={it.id} className="flex items-center justify-between rounded-md bg-white/5 px-3 py-2">
+                    <span className="inline-flex items-center gap-2"><Folder className="size-4 text-white/60" /> {it.name}</span>
+                    <button
+                      className="text-red-500 text-sm"
+                      onClick={async () => {
+                        if (!confirm(`Excluir ponto "${it.name}"?`)) return
+                        await fetch(`/api/attractions?id=${it.id}`, { method: 'DELETE', headers: { 'x-admin-token': token } })
+                        await refreshCity(city.id)
+                        await revalidateCityById(city.id)
+                      }}
+                    >
+                      Excluir
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="text-gray-400">Nenhum ponto cadastrado.</p>}
+          </div>
 
-                    {/* Hotéis */}
-                    <div className="rounded-lg border border-white/10 p-3">
-                      <div className="font-semibold mb-2">Hotéis</div>
-                      {data.hotels.length ? (
-                        <ul className="space-y-2">
-                          {data.hotels.map((it) => (
-                            <li key={it.id} className="flex items-center justify-between rounded-md bg-white/5 px-3 py-2">
-                              <span className="inline-flex items-center gap-2"><Folder className="size-4 text-white/60" /> {it.name}</span>
-                              <button
-                                className="text-red-500 text-sm"
-                                onClick={async () => {
-                                  if (!confirm(`Excluir hotel "${it.name}"?`)) return
-                                  await fetch(`/api/hotels?id=${it.id}`, { method: 'DELETE', headers: { 'x-admin-token': token } })
-                                  await refreshCity(city.id)
-                                  await revalidateCityById(city.id)
-                                }}
-                              >
-                                Excluir
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : <p className="text-gray-400">Nenhum hotel cadastrado.</p>}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
+          {/* Restaurantes */}
+          <div className="rounded-lg border border-white/10 p-3">
+            <div className="font-semibold mb-2">Restaurantes</div>
+            {data.restaurants.length ? (
+              <ul className="space-y-2">
+                {data.restaurants.map((it) => (
+                  <li key={it.id} className="flex items-center justify-between rounded-md bg-white/5 px-3 py-2">
+                    <span className="inline-flex items-center gap-2"><Folder className="size-4 text-white/60" /> {it.name}</span>
+                    <button
+                      className="text-red-500 text-sm"
+                      onClick={async () => {
+                        if (!confirm(`Excluir restaurante "${it.name}"?`)) return
+                        await fetch(`/api/restaurants?id=${it.id}`, { method: 'DELETE', headers: { 'x-admin-token': token } })
+                        await refreshCity(city.id)
+                        await revalidateCityById(city.id)
+                      }}
+                    >
+                      Excluir
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="text-gray-400">Nenhum restaurante cadastrado.</p>}
+          </div>
+
+          {/* Hotéis */}
+          <div className="rounded-lg border border-white/10 p-3">
+            <div className="font-semibold mb-2">Hotéis</div>
+            {data.hotels.length ? (
+              <ul className="space-y-2">
+                {data.hotels.map((it) => (
+                  <li key={it.id} className="flex items-center justify-between rounded-md bg-white/5 px-3 py-2">
+                    <span className="inline-flex items-center gap-2"><Folder className="size-4 text-white/60" /> {it.name}</span>
+                    <button
+                      className="text-red-500 text-sm"
+                      onClick={async () => {
+                        if (!confirm(`Excluir hotel "${it.name}"?`)) return
+                        await fetch(`/api/hotels?id=${it.id}`, { method: 'DELETE', headers: { 'x-admin-token': token } })
+                        await refreshCity(city.id)
+                        await revalidateCityById(city.id)
+                      }}
+                    >
+                      Excluir
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="text-gray-400">Nenhum hotel cadastrado.</p>}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+})}
+
         </div>
       </div>
     </Container>

@@ -1,10 +1,6 @@
 {
-  "/page": "app/page.js",
   "/admin/page": "app/admin/page.js",
-  "/cidade/[slug]/page": "app/cidade/[slug]/page.js",
-  "/api/upload/route": "app/api/upload/route.js",
   "/api/cities/route": "app/api/cities/route.js",
-  "/api/attractions/route": "app/api/attractions/route.js",
-  "/api/hotels/route": "app/api/hotels/route.js",
-  "/api/restaurants/route": "app/api/restaurants/route.js"
+  "/api/revalidate/route": "app/api/revalidate/route.js",
+  "/page": "app/page.js"
 }
