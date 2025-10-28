@@ -5,6 +5,12 @@ import Container from '@/components/Container'
 import { Button, Input, Textarea, Label } from '@/components/FormBits'
 import { Folder, FolderOpen, Image as ImageIcon } from 'lucide-react'
 
+
+
+
+
+
+
 // ---------- token admin ----------
 function useAdminToken() {
   const [token, setToken] = useState('')
@@ -143,44 +149,97 @@ export default function AdminPage() {
       {/* cadastros */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* cidade */}
-        <div className="card p-4">
-          <h2 className="font-semibold text-lg mb-2">Cadastrar Cidade</h2>
-          <div className="space-y-2">
-            <div><Label>Nome</Label><Input value={c.name} onChange={e=>setC({...c, name:e.target.value})} /></div>
-            <div><Label>Slug (ex: curitiba)</Label><Input value={c.slug} onChange={e=>setC({...c, slug:e.target.value})} /></div>
-            <div><Label>Descrição</Label><Textarea value={c.description} onChange={e=>setC({...c, description:e.target.value})} /></div>
+        {/* cidade */}
+<div className="card p-4">
+  <h2 className="font-semibold text-lg mb-2">Cadastrar Cidade</h2>
+  <div className="space-y-2">
+    <div>
+      <Label>Nome</Label>
+      <Input
+        value={c.name}
+        onChange={e => {
+          const name = e.target.value
+          // gera slug automaticamente com base no nome
+          const slug = name
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // remove acentos
+            .replace(/[^a-z0-9]+/g, '-') // substitui espaços e caracteres inválidos por "-"
+            .replace(/^-+|-+$/g, '') // remove traços no início/fim
+          setC({ ...c, name, slug })
+        }}
+      />
+    </div>
 
-            {/* upload imagem (banner) */}
-            <div className="mt-2">
-              <Label>Imagem da cidade (banner)</Label>
-              <div className="flex items-center gap-3">
-                <label className="btn" htmlFor="up-city"><ImageIcon className="size-4 mr-2" /> Selecionar imagem</label>
-                <input id="up-city" type="file" accept="image/*" className="hidden" onChange={(e)=>setCFile(e.target.files?.[0] || null)} />
-                {isUpC && <span className="text-xs text-gray-500">Enviando...</span>}
-              </div>
-              {cPrev && (
-                <div className="mt-2 relative rounded-lg overflow-hidden ring-1 ring-white/10" style={{ aspectRatio: '16 / 9' }}>
-                  <img src={cPrev} alt="Prévia" className="h-full w-full object-cover" />
-                </div>
-              )}
-            </div>
+    <div>
+      <Label>Slug (gerado automaticamente)</Label>
+      <Input value={c.slug} readOnly className="bg-gray-100 text-gray-500 cursor-not-allowed" />
+    </div>
 
-            <div className="pt-2 flex justify-end">
-              <Button variant="primary" onClick={async()=>{
-                let banner_image_url: string | undefined
-                if (cFile) {
-                  try { setIsUpC(true); banner_image_url = await uploadImage(cFile, 'cities', c.slug || c.name || 'cidade') }
-                  finally { setIsUpC(false) }
-                }
-                await api('/api/cities','POST',{ ...c, ...(banner_image_url ? { banner_image_url } : {}) })
-                alert('Cidade criada!')
-                setC({ name:'', slug:'', description:'' }); setCFile(null)
-                const fresh = await fetch('/api/cities', { cache:'no-store' }).then(r=>r.json())
-                if (Array.isArray(fresh)) setCities(fresh)
-              }}>Salvar</Button>
-            </div>
-          </div>
+    <div>
+      <Label>Descrição</Label>
+      <Textarea
+        value={c.description}
+        onChange={e => setC({ ...c, description: e.target.value })}
+      />
+    </div>
+
+    {/* upload imagem (banner) */}
+    <div className="mt-2">
+      <Label>Imagem da cidade (banner)</Label>
+      <div className="flex items-center gap-3">
+        <label className="btn" htmlFor="up-city">
+          <ImageIcon className="size-4 mr-2" /> Selecionar imagem
+        </label>
+        <input
+          id="up-city"
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => setCFile(e.target.files?.[0] || null)}
+        />
+        {isUpC && <span className="text-xs text-gray-500">Enviando...</span>}
+      </div>
+      {cPrev && (
+        <div
+          className="mt-2 relative rounded-lg overflow-hidden ring-1 ring-white/10"
+          style={{ aspectRatio: '16 / 9' }}
+        >
+          <img src={cPrev} alt="Prévia" className="h-full w-full object-cover" />
         </div>
+      )}
+    </div>
+
+    <div className="pt-2 flex justify-end">
+      <Button
+        variant="primary"
+        onClick={async () => {
+          let banner_image_url: string | undefined
+          if (cFile) {
+            try {
+              setIsUpC(true)
+              banner_image_url = await uploadImage(cFile, 'cities', c.slug || c.name || 'cidade')
+            } finally {
+              setIsUpC(false)
+            }
+          }
+          await api('/api/cities', 'POST', {
+            ...c,
+            ...(banner_image_url ? { banner_image_url } : {}),
+          })
+          alert('Cidade criada!')
+          setC({ name: '', slug: '', description: '' })
+          setCFile(null)
+          const fresh = await fetch('/api/cities', { cache: 'no-store' }).then((r) => r.json())
+          if (Array.isArray(fresh)) setCities(fresh)
+        }}
+      >
+        Salvar
+      </Button>
+    </div>
+  </div>
+</div>
+
 
         {/* ponto */}
         <div className="card p-4">
@@ -325,32 +384,34 @@ export default function AdminPage() {
   const data = byCity[city.id] ?? { attractions: [], restaurants: [], hotels: [] }
 
   return (
-    <div key={city.id} className="rounded-xl border border-white/15 bg-white/5">
-      <div className="flex items-center justify-between px-4 py-3">
+    <div
+      key={city.id}
+      className="rounded-xl border border-gray-300 bg-gray-100 hover:bg-gray-200 transition-all duration-200 shadow-md"
+    >
+      {/* Cabeçalho da cidade */}
+      <div className="flex items-center justify-between px-4 py-4 border-b border-gray-300">
         <button
-          className="flex-1 text-left flex items-center gap-3"
+          className="flex-1 text-left flex items-center gap-3 text-gray-900"
           onClick={async () => {
             setOpen(prev => ({ ...prev, [city.id]: !prev[city.id] }))
             if (!byCity[city.id]) await refreshCity(city.id)
           }}
         >
-          {isOpen ? <FolderOpen className="size-5 text-white/70" /> : <Folder className="size-5 text-white/70" />}
+          {isOpen ? <FolderOpen className="size-5 text-gray-700" /> : <Folder className="size-5 text-gray-700" />}
           <div>
-            <div className="font-medium">{city.name}</div>
-            <div className="text-xs text-gray-400">
-              {totals.pts} pts • {totals.rests} rests • {totals.hots} hotéis
+            <div className="font-semibold text-lg text-gray-900">{city.name}</div>
+            <div className="text-xs text-gray-600">
+              {totals.pts} pontos • {totals.rests} restaurantes • {totals.hots} hotéis
             </div>
           </div>
         </button>
 
-        {/* Botão excluir cidade */}
         <button
-          className="ml-4 text-red-400 text-sm hover:text-red-500"
+          className="ml-4 text-sm text-red-500 hover:text-red-600 font-medium"
           onClick={async () => {
             if (!confirm(`Tem certeza que deseja excluir a cidade "${city.name}" e todos os seus dados?`)) return
             await fetch(`/api/cities?id=${city.id}`, { method: 'DELETE', headers: { 'x-admin-token': token } })
             alert(`Cidade "${city.name}" excluída com sucesso!`)
-            // atualiza lista
             const fresh = await fetch('/api/cities', { cache: 'no-store' }).then(r => r.json())
             if (Array.isArray(fresh)) setCities(fresh)
             await fetch('/api/revalidate', {
@@ -360,24 +421,33 @@ export default function AdminPage() {
             })
           }}
         >
-          Excluir
+          Excluir cidade
         </button>
       </div>
 
+      {/* Conteúdo expandido */}
       {isOpen && (
-        <div className="px-4 pb-4 grid md:grid-cols-3 gap-4">
-          {/* Pontos */}
-          <div className="rounded-lg border border-white/10 p-3">
-            <div className="font-semibold mb-2">Pontos turísticos</div>
+        <div className="p-4 bg-gray-50 rounded-b-xl space-y-6">
+          {/* Pontos turísticos */}
+          <div>
+            <h3 className="font-semibold mb-2 text-gray-900 flex items-center justify-between">
+              <span>Pontos turísticos</span>
+              <span className="text-xs text-gray-600">{data.attractions.length} cadastrados</span>
+            </h3>
             {data.attractions.length ? (
               <ul className="space-y-2">
                 {data.attractions.map((it) => (
-                  <li key={it.id} className="flex items-center justify-between rounded-md bg-white/5 px-3 py-2">
-                    <span className="inline-flex items-center gap-2"><Folder className="size-4 text-white/60" /> {it.name}</span>
+                  <li
+                    key={it.id}
+                    className="flex items-center justify-between bg-gray-200 rounded-md px-3 py-2 hover:bg-gray-300 transition text-gray-900"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Folder className="size-4 text-gray-700" /> {it.name}
+                    </span>
                     <button
-                      className="text-red-500 text-sm"
+                      className="text-red-500 hover:text-red-600 text-sm"
                       onClick={async () => {
-                        if (!confirm(`Excluir ponto "${it.name}"?`)) return
+                        if (!confirm(`Excluir ponto turístico "${it.name}"?`)) return
                         await fetch(`/api/attractions?id=${it.id}`, { method: 'DELETE', headers: { 'x-admin-token': token } })
                         await refreshCity(city.id)
                         await revalidateCityById(city.id)
@@ -388,19 +458,27 @@ export default function AdminPage() {
                   </li>
                 ))}
               </ul>
-            ) : <p className="text-gray-400">Nenhum ponto cadastrado.</p>}
+            ) : <p className="text-gray-600 text-sm italic">Nenhum ponto cadastrado.</p>}
           </div>
 
           {/* Restaurantes */}
-          <div className="rounded-lg border border-white/10 p-3">
-            <div className="font-semibold mb-2">Restaurantes</div>
+          <div>
+            <h3 className="font-semibold mb-2 text-gray-900 flex items-center justify-between">
+              <span>Restaurantes</span>
+              <span className="text-xs text-gray-600">{data.restaurants.length} cadastrados</span>
+            </h3>
             {data.restaurants.length ? (
               <ul className="space-y-2">
                 {data.restaurants.map((it) => (
-                  <li key={it.id} className="flex items-center justify-between rounded-md bg-white/5 px-3 py-2">
-                    <span className="inline-flex items-center gap-2"><Folder className="size-4 text-white/60" /> {it.name}</span>
+                  <li
+                    key={it.id}
+                    className="flex items-center justify-between bg-gray-200 rounded-md px-3 py-2 hover:bg-gray-300 transition text-gray-900"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Folder className="size-4 text-gray-700" /> {it.name}
+                    </span>
                     <button
-                      className="text-red-500 text-sm"
+                      className="text-red-500 hover:text-red-600 text-sm"
                       onClick={async () => {
                         if (!confirm(`Excluir restaurante "${it.name}"?`)) return
                         await fetch(`/api/restaurants?id=${it.id}`, { method: 'DELETE', headers: { 'x-admin-token': token } })
@@ -413,19 +491,27 @@ export default function AdminPage() {
                   </li>
                 ))}
               </ul>
-            ) : <p className="text-gray-400">Nenhum restaurante cadastrado.</p>}
+            ) : <p className="text-gray-600 text-sm italic">Nenhum restaurante cadastrado.</p>}
           </div>
 
           {/* Hotéis */}
-          <div className="rounded-lg border border-white/10 p-3">
-            <div className="font-semibold mb-2">Hotéis</div>
+          <div>
+            <h3 className="font-semibold mb-2 text-gray-900 flex items-center justify-between">
+              <span>Hotéis</span>
+              <span className="text-xs text-gray-600">{data.hotels.length} cadastrados</span>
+            </h3>
             {data.hotels.length ? (
               <ul className="space-y-2">
                 {data.hotels.map((it) => (
-                  <li key={it.id} className="flex items-center justify-between rounded-md bg-white/5 px-3 py-2">
-                    <span className="inline-flex items-center gap-2"><Folder className="size-4 text-white/60" /> {it.name}</span>
+                  <li
+                    key={it.id}
+                    className="flex items-center justify-between bg-gray-200 rounded-md px-3 py-2 hover:bg-gray-300 transition text-gray-900"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Folder className="size-4 text-gray-700" /> {it.name}
+                    </span>
                     <button
-                      className="text-red-500 text-sm"
+                      className="text-red-500 hover:text-red-600 text-sm"
                       onClick={async () => {
                         if (!confirm(`Excluir hotel "${it.name}"?`)) return
                         await fetch(`/api/hotels?id=${it.id}`, { method: 'DELETE', headers: { 'x-admin-token': token } })
@@ -438,13 +524,18 @@ export default function AdminPage() {
                   </li>
                 ))}
               </ul>
-            ) : <p className="text-gray-400">Nenhum hotel cadastrado.</p>}
+            ) : <p className="text-gray-600 text-sm italic">Nenhum hotel cadastrado.</p>}
           </div>
         </div>
       )}
     </div>
   )
 })}
+
+
+
+
+
 
         </div>
       </div>

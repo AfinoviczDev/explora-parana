@@ -74,13 +74,7 @@ export default function Header() {
           })}
 
           {/* Ações */}
-          <TransitionLink
-            href="/admin"
-            className="ml-2 px-3 py-2 rounded-lg border border-black/15 text-[#2B4940] hover:bg-black/5 transition"
-            aria-label="Área admin"
-          >
-            Admin
-          </TransitionLink>
+          
           <TransitionLink
             href="/"
             className="ml-1 px-3.5 py-2 rounded-lg bg-[#2B4940] text-white hover:brightness-110 transition shadow-sm"
@@ -127,12 +121,7 @@ export default function Header() {
               )
             })}
             <div className="mt-2 flex items-center gap-2">
-              <TransitionLink
-                href="/admin"
-                className="flex-1 px-3 py-2 rounded-lg border border-black/15 text-[#2B4940] text-center hover:bg-black/5 transition"
-              >
-                Admin
-              </TransitionLink>
+              
               <TransitionLink
                 href="/"
                 className="flex-1 px-3 py-2 rounded-lg bg-[#2B4940] text-white text-center hover:brightness-110 transition"

@@ -1,6 +1,6 @@
 {
+  "/login/page": "app/login/page.js",
   "/admin/page": "app/admin/page.js",
-  "/api/cities/route": "app/api/cities/route.js",
-  "/api/revalidate/route": "app/api/revalidate/route.js",
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/cidade/[slug]/page": "app/cidade/[slug]/page.js"
 }

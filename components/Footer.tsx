@@ -72,12 +72,7 @@ export default function Footer() {
                   </TransitionLink>
                 </li>
                 <li>
-                  <TransitionLink
-                    href="/admin"
-                    className="text-[#2B4940]/80 hover:text-[#163027] transition-colors"
-                  >
-                    Admin
-                  </TransitionLink>
+                
                 </li>
               </ul>
             </div>
@@ -94,13 +89,13 @@ export default function Footer() {
                 <p className="text-sm text-[#2B4940]/80">
                   © {year} <span className="font-medium">Explora Paraná</span>. Feito por{' '}
                   <a
-                    href="https://instagram.com/paranaemfoto"
+                    href="https://www.linkedin.com/in/jo%C3%A3o-pedro-afinovicz-283354304/"
                     target="_blank"
                     rel="noreferrer noopener"
                     className="underline hover:no-underline text-[#163027]"
                     title="Douglas Cristiano no Instagram"
                   >
-                    Douglas Cristiano
+                    Afinovicz Dev
                   </a>
                   .
                 </p>
