@@ -4,8 +4,8 @@ export async function POST(req: Request) {
   const { username, password } = await req.json();
 
   // credenciais seguras definidas em variáveis de ambiente
-  const validUser = process.env.ADMIN_USER || "admin";
-  const validPass = process.env.ADMIN_PASS || "123456";
+  const validUser = process.env.ADMIN_USER || "explorapradmin";
+  const validPass = process.env.ADMIN_PASS || "explorapr25";
 
   if (username === validUser && password === validPass) {
     const res = NextResponse.json({ success: true });

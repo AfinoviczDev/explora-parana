@@ -6,9 +6,9 @@ import DeckColumn, { type DeckItem } from '@/components/DeckColumn'
 import RestaurantShowcase, { type RestaurantItem } from '@/components/RestaurantShowcase'
 import HotelGrid, { type HotelItem } from '@/components/HotelGrid'
 
-// NOVO:
-import AttractionShowcase from '@/components/AttractionShowcase'
-import type { AttractionItem } from '@/components/AttractionShowcase'
+// ❌ Removido o carrossel
+// import AttractionShowcase from '@/components/AttractionShowcase'
+// import type { AttractionItem } from '@/components/AttractionShowcase'
 
 // Se você já usa CitySection + CityCards para as outras seções:
 import CitySection from '@/components/CitySection'
@@ -36,6 +36,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     title: `${city.name} — Paraná em Foto`,
     description: city.description || `Descubra ${city.name} no Paraná em Foto`,
   }
+}
+
+type AttractionItem = {
+  id: number
+  name: string
+  description?: string | null
+  image_url?: string | null
+  // outros campos que você tenha… (não são obrigatórios para este grid)
 }
 
 export default async function CityPage({ params }: { params: { slug: string } }) {
@@ -79,7 +87,14 @@ export default async function CityPage({ params }: { params: { slug: string } })
           </LocalTitle>
         </div>
       </Container>
-      <AttractionShowcase items={attractions} title="" />
+      {/* ✅ Grid simples no lugar do carrossel */}
+      <CitySection id="pontos" title="" subtitle="" variant="block">
+        {attractions.length ? (
+          <SimpleAttractionsGrid items={attractions} />
+        ) : (
+          <EmptySlot text="Ainda não cadastramos pontos turísticos nesta cidade." />
+        )}
+      </CitySection>
 
       {/* Restaurantes — TÍTULO À ESQUERDA */}
       <Container>
@@ -107,6 +122,62 @@ export default async function CityPage({ params }: { params: { slug: string } })
 
       <div className="h-10" />
     </div>
+  )
+}
+
+/** ---------- Grid simples de atrações (sem carrossel) ---------- */
+function SimpleAttractionsGrid({ items }: { items: AttractionItem[] }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {items.map((a) => (
+        <AttractionCard key={a.id} item={a} />
+      ))}
+    </div>
+  )
+}
+
+function AttractionCard({ item }: { item: AttractionItem }) {
+  const img =
+    item.image_url ||
+    // fallback leve
+    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&auto=format&fit=crop&q=60'
+
+  return (
+    <a
+      href={`/atracao/${item.id}`}
+      className="group rounded-2xl overflow-hidden border border-white/15 bg-white/5 backdrop-blur-[2px] shadow-[0_8px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_10px_40px_rgba(0,0,0,0.35)] transition-all duration-300"
+    >
+      <div className="relative aspect-[16/10] overflow-hidden">
+        {/* use <img> simples para não depender de next/image aqui */}
+        <img
+          src={img}
+          alt={item.name}
+          className="h-full w-full object-cover transform transition-transform duration-500 group-hover:scale-[1.04]"
+          loading="lazy"
+        />
+        {/* label sutil */}
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/45 px-2 py-1 text-[11px] font-medium text-white/90">
+          Explora Paraná
+        </span>
+      </div>
+
+      <div className="p-4">
+        <h3 className="text-lg font-semibold text-[#E5DCC9]">
+          {item.name}
+        </h3>
+        {item.description ? (
+          <p className="mt-1 text-sm text-white/80 line-clamp-2">
+            {item.description}
+          </p>
+        ) : null}
+
+        <div className="mt-4">
+          <span className="inline-flex items-center text-[12px] text-white/70">
+            Ver detalhes →
+          </span>
+        </div>
+      </div>
+    </a>
   )
 }
 
