@@ -2,6 +2,7 @@
 import Container from "@/components/Container";
 import { getSupabasePublic } from "@/lib/supabasePublic";
 
+
 export const revalidate = 60;
 
 type AnyRec = Record<string, any>;

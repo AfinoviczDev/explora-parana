@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import type { HotelItem } from "./HotelsCoverflowSection";
+import type { HotelItem } from "./HotelGrid";
 
 export default function HotelsCoverflowClient({ items }: { items: HotelItem[] }) {
   const scroller = useRef<HTMLDivElement | null>(null);
