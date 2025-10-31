@@ -57,27 +57,37 @@ export default function HotelsCoverflowClient({ items }: { items: HotelItem[] })
         className="flex gap-5 overflow-x-auto no-scrollbar snap-x snap-mandatory"
         style={{ scrollBehavior: "auto" }}
       >
-        {items.map((h) => (
-          <motion.article
-            key={h.id}
-            whileHover={{ y: -6, scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 240, damping: 22 }}
-            className="snap-start shrink-0 w-[280px] rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/20"
-          >
-            <Link href={h.slug ? `/hotel/${h.slug}` : "#"} className="block">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={h.image_url || "/placeholder.jpg"}
-                alt={h.name}
-                className="h-44 w-full object-cover"
-              />
-              <div className="p-4">
-                <div className="text-xs text-white/70">{h.city_name || "Paraná"}</div>
-                <h3 className="text-white font-semibold mt-1">{h.name}</h3>
-              </div>
-            </Link>
-          </motion.article>
-        ))}
+        {items.map((h) => {
+          // Alguns campos chegam via view/join e não existem no tipo base:
+          const anyH = h as any;
+          const cityName: string = anyH.city_name ?? "Paraná";
+          const citySlug: string | undefined = anyH.city_slug ?? anyH.city?.slug;
+          const img: string =
+            (h as any).banner_url || (h as any).image_url || "/placeholder.jpg";
+          const href = citySlug ? `/cidade/${citySlug}` : "#";
+
+          return (
+            <motion.article
+              key={h.id}
+              whileHover={{ y: -6, scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 240, damping: 22 }}
+              className="snap-start shrink-0 w-[280px] rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/20"
+            >
+              <Link href={href} className="block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={img}
+                  alt={h.name}
+                  className="h-44 w-full object-cover"
+                />
+                <div className="p-4">
+                  <div className="text-xs text-white/70">{cityName}</div>
+                  <h3 className="text-white font-semibold mt-1">{h.name}</h3>
+                </div>
+              </Link>
+            </motion.article>
+          );
+        })}
       </div>
     </section>
   );
