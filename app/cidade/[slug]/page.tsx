@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getSupabasePublic } from '@/lib/supabasePublic'
 import CityHeroSplit from '@/components/CityHeroSplit'
-import DeckColumn, { type DeckItem } from '@/components/DeckColumn'
 import RestaurantShowcase, { type RestaurantItem } from '@/components/RestaurantShowcase'
 import HotelGrid, { type HotelItem } from '@/components/HotelGrid'
 
